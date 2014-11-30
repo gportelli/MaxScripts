@@ -78,7 +78,7 @@ fn align_vert_matrix direction =
 	-- check matrix 
 	
 	for i=2 to matrix.count do (		
-		if matrix[i].count != matrix[1].count or matrix[1].count == 1 do 
+		if matrix[i].count != matrix[1].count do 
 		(
 			if direction == "vert" then (
 				messagebox "You must select a vertex matrix, with rows aligned"
