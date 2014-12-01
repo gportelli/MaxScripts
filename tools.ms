@@ -163,8 +163,20 @@ rollout uvroll "Unwrap UVW Tools"
 		btn_align_vert_matrix_v.FlatAppearance.BorderSize = 0;
 	)
 	
-	on btn_align_vert_matrix_h click do align_vert_matrix "horiz"
-	on btn_align_vert_matrix_v click do align_vert_matrix "vert"
+	on btn_align_vert_matrix_h click do 
+	(
+		undo on
+		(
+			align_vert_matrix "horiz"
+		)
+	)
+	on btn_align_vert_matrix_v click do 
+	(
+		undo on
+		(
+			align_vert_matrix "vert"
+		)
+	)
 )	
 
 
