@@ -108,7 +108,7 @@ rollout uvCollapseRoll "Collapse UV"
 			if  isProperty  obj #unwrap_UVW == true do 
 				deleteModifier obj 1
 			
-			showAllEdges()
+			--showAllEdges()
 			
 			unwrap = unwrap_UVW()
 			addmodifier obj unwrap
