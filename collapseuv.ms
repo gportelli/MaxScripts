@@ -3,8 +3,12 @@ try(closeRolloutFloater toolsFloater)catch()
 
 rollout uvCollapseRoll "Collapse UV"
 (	
-	button btn_collapse "Collapse UV to random points"	
-	--button btn_randomw "Set Random W"	
+	button btn_collapse "Collapse UV to random point"	
+	button btn_collapse_triangle "Collapse UV to constant triangle"	
+	button btn_randomw "Set Random W"	
+	--button btn_createtriangles "Create Triangles"
+	--button btn_breakfaces "Break Faces"
+	--button btn_setchannel "Set Channel"
 	
 	fn showAllEdges =
 	(
@@ -45,7 +49,38 @@ rollout uvCollapseRoll "Collapse UV"
 			obj.unwrap_UVW.breakSelected() 
 		)
 	)
-
+	
+	on btn_createtriangles pressed do 
+	(
+		undo on
+		(
+			showAllEdges ()
+		)
+	)
+	
+	on btn_breakfaces pressed do 
+	(
+		breakFaces()
+	)
+	
+	on btn_setchannel pressed do 
+	(
+		if selection.count != 1 do (
+			messagebox "No object selected"
+			return()	
+		)
+		
+		obj = selection[1]
+		
+		if  isProperty  obj #unwrap_UVW == true do 
+				deleteModifier obj 1
+			
+		unwrap = unwrap_UVW()
+		addmodifier obj unwrap
+		
+		obj.unwrap_UVW.setMapChannel 3
+	)
+	
 	on btn_randomw pressed do 
 	(
 		if selection.count != 1 do (
@@ -136,6 +171,59 @@ rollout uvCollapseRoll "Collapse UV"
 					--format "vertex (%) pos: % %\n" ver vp.x vp.y
 					
 					obj.unwrap_UVW.SetVertexPosition 0 ver [u, v, 0]
+				)
+			)
+			
+			obj.unwrap_UVW.selectFaces #{}
+		)
+	)
+	
+	on btn_collapse_triangle pressed do 
+	(
+		if selection.count != 1 do (
+			messagebox "No object selected"
+			return()	
+		)
+		
+		obj = selection[1]
+		
+		undo on
+		(
+			if  isProperty  obj #unwrap_UVW == true do 
+				deleteModifier obj 1
+			
+			--showAllEdges()
+			
+			unwrap = unwrap_UVW()
+			addmodifier obj unwrap
+			obj.unwrap_UVW.setMapChannel 3
+			
+			breakFaces()
+			
+			obj.unwrap_UVW.selectFaces #{1..obj.numfaces}
+			
+			uvArray = #([0, 0, 0], [0,1,0], [1,1,0])
+				
+			for face in obj.unwrap_UVW.getSelectedFaces() do
+			(
+				--format "face (%)\n" face
+				
+				obj.unwrap_UVW.selectFaces #{face}
+				obj.unwrap_UVW.faceToVertSelect()
+				
+				local u = random 0.0 1.0
+				local v = random 0.0 1.0
+				
+				--format "Setting uv = (%,%)\n" u v
+				local index = 1
+				for ver in obj.unwrap_UVW.getSelectedVertices() do
+				(
+					vp = obj.unwrap_UVW.getVertexPosition 0 ver
+					--format "vertex (%) pos: % %\n" ver vp.x vp.y
+					
+					obj.unwrap_UVW.SetVertexPosition 0 ver uvArray[index]
+					
+					index = index+1
 				)
 			)
 			
