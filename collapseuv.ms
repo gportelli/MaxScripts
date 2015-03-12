@@ -3,16 +3,19 @@ try(closeRolloutFloater toolsFloater)catch()
 
 rollout uvCollapseRoll "Collapse UV"
 (	
-	button btn_randomw "Set Random W"	
-	button btn_collapse "Collapse UV to random point"		
-	
-	group "Show Triangular Edges" (
-		button btn_collapse_triangle "Collapse tris over edges map"	
-		spinner map_size "Map size: " range:[0,2048,1024] type:#integer
-		spinner line_size "Map white size: " range:[0,800,256] type:#integer
-		spinner line_thickness "Line thickness: " range:[0,800,2] type:#float
+	--button btn_randomw "Set Random W"	
+	group "Face Indexing" (
+		button btn_collapse "Collapse UV to random point"		
 	)
 	
+	group "Show Triangular Edges" (
+		button btn_collapse_triangle "Map triangles for edge mapping"	
+		spinner map_size "Map size (px): " range:[0,2048,1024] type:#integer
+		spinner line_size "Map line size (px): " range:[0,800,256] type:#integer
+		spinner line_thickness "Line thickness (units): " range:[0,800,2] type:#float
+	)
+	
+	/*
 	group "Debug" (
 		spinner face_id "Face ID: " range:[1,2048,28] type:#integer
 		button btn_select_face "Select mesh face"	
@@ -23,6 +26,7 @@ rollout uvCollapseRoll "Collapse UV"
 		button btn_open_uvw "Open UVW"	
 		button btn_close_uvw "Close UVW"	
 	)
+	*/
 	
 	--button btn_createtriangles "Create Triangles"
 	--button btn_breakfaces "Break Faces"
@@ -314,47 +318,77 @@ rollout uvCollapseRoll "Collapse UV"
 		)
 	)
 	
-	fn pointLineDist2 pA pB pC = (
+	-- returns dinstance of vertex p0 from segment pA-pB
+	fn pointLineDist2 pA pB p0 = (
 		local vAB=pB-pA
-		local vAC=pC-pA
-		return (length (cross vAB vAC))/(length vAB)
+		local vA0=p0-pA
+		return (length (cross vAB vA0))/(length vAB)
 	)
 
-	fn getLineOffset p1 p2 p0 diag =
+	-- returns incenter of triangle with vertex pA pB pC
+	fn getIncenter pA pB pC =
 	(
-		-- get distance of p0 from segment p1-p2 (height of the triangle respective to p1-p2 segment)
-		h = pointLineDist2 p1 p2 p0
-		k = line_thickness.value / h
-		if h_perc > 1 then k = 1				
+		local a = length(pB - pC)
+		local b = length(pA - pC)
+		local c = length(pB - pA)
 		
-		line_s  = float(line_size.value)
-		map_s = float(map_size.value)
+		local incenter = (a * pA + b * pB + c * pC) / (a+ b + c)
 		
-		if diag == 0 then
-			max_k = line_s / (map_s - line_s * (1 + sqrt(2)))
-		else
-			max_k = line_s / (map_s / sqrt(2) - line_s * sqrt(2))
-				
-		format "h=% h_perc=% max_perc=% \n" h h_perc max_perc
-				
-		if k >  max_k then (
-			k = max_k
-			format "clamped to %\n" h_perc
-		)
-		
-		black_l      = map_s - line_s * (2 + sqrt(2))
-		black_diag = black_l / sqrt(2)
-		
-		--format "black_l=% black_diag=%\n" black_l black_diag
-			
-		if diag == 0 then
-			black_s = black_l / map_s
-		else
-			black_s = black_diag / map_s
-		
-		return line_s / map_s - h_perc * black_s / (1 - k)
+		return incenter
 	)
 	
+	-- returns the inset vertex relative to p0 in triangle pA pB p0 where inset is the thickness of the inset
+	fn getInsetVertex pA pB p0 inset =
+	(
+		incenter = getIncenter pA pB p0
+		mA0 = pointLineDist2 pA p0 incenter
+		r = inset / mA0
+		if r > 1 then r = 1
+			
+		return p0 + (incenter - p0) * r
+	)
+	
+	-- get ratio between thickness and height from edge p1-p2 to p0 inset, diag is a boolean for diagonal UV edge
+	fn getLineTicknessPerc p1 p2 p0 diag =
+	(
+		line_t = float(line_thickness.value)
+		
+		-- get distance of p0 from segment p1-p2 (height of the triangle respective to p1-p2 segment)
+		inset = getInsetVertex p1 p2 p0 line_t
+		h = pointLineDist2 p1 p2 inset
+		k = line_t / h
+		
+		root2 = sqrt(2)
+		line_s  = float(line_size.value)
+		map_s = float(map_size.value)
+		l = (map_s - line_s * (2 + root2)) / map_s
+		
+		max_k = line_s/map_s*2 / (line_s/map_s*2 + l/root2)
+			
+		if k > 1 then return 1
+		if k > max_k then return max_k else return k
+	)
+	
+	-- get UV offsets of triangle p1-p2-p3 given k1 k2 k3 line thickness ratios
+	fn getTriangleOffsets p1 p2 p3 k1 k2 k3 =
+	(
+		local root2 = sqrt(2)
+		local line_s  = float(line_size.value)
+		local map_s = float(map_size.value)
+		
+		if k1 == 1 or k2 == 1 or k3 == 1 then
+			return [0, 0,  1/root2]
+		
+		local l = (map_s - line_s * (2 + root2)) / map_s
+		
+		local e1 = line_s / map_s - l * k1 / (1 - k1)
+		local e2 = line_s / map_s - l * k2 / (1 - k2)
+		local e3 = line_s / map_s - l / root2 * k3 / (1 - k3)
+			
+		return [e1, e2, e3]
+	)
+	
+	-- creates UV coords for each triangle in order to obtain constant thickness edge lines
 	on btn_collapse_triangle pressed do 
 	(
 		if selection.count != 1 do (
@@ -394,23 +428,26 @@ rollout uvCollapseRoll "Collapse UV"
 				mv3 = getVert obj meshverts[3]
 				
 				-- get offsets for each face edge
-				eo1 = getLineOffset mv1 mv2 mv3 0
-				eo2 = getLineOffset mv2 mv3 mv1 0
-				eo3 = getLineOffset mv3 mv1 mv2 1
+				k1 = getLineTicknessPerc mv1 mv2 mv3 0
+				k2 = getLineTicknessPerc mv2 mv3 mv1 0
+				k3 = getLineTicknessPerc mv1 mv3 mv2 1
 				
-				/*
-				eo1=0 --float(line_size.value) / map_size.value
-				eo2=0 -- float(line_size.value) / map_size.value
-				eo3=0 --float(line_size.value) / map_size.value
-				*/
-
-				format "Edge offsets: (%, %, %)\n" eo1 eo2 eo3 				
+				format "tickness: (%, %, %)\n" k1 k2 k3
+				
+				line_s  = float(line_size.value)
+				map_s = float(map_size.value)
+				
+				offsets = getTriangleOffsets mv1 mv2 mv3 k1 k2 k3
+				format "Edge offsets: %\n" offsets
+				eo1 = offsets[1]
+				eo2 = offsets[2]
+				eo3 = offsets[3]
 				
 				-- get map face vertex indexes				
 				uv1 = obj.unwrap_UVW.getVertexIndexFromFace face 1
 				uv2 = obj.unwrap_UVW.getVertexIndexFromFace face 2
 				uv3 = obj.unwrap_UVW.getVertexIndexFromFace face 3
-				
+		
 				uvArray[1].x = eo1
 				uvArray[2].x = eo1
 				
@@ -431,5 +468,5 @@ rollout uvCollapseRoll "Collapse UV"
 	)
 )	
 
-toolsFloater = newRolloutFloater "UV Tools" 200 450
+toolsFloater = newRolloutFloater "UV Tools" 250 210
 addRollout uvCollapseRoll toolsFloater
