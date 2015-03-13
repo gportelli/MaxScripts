@@ -12,9 +12,9 @@ rollout uvCollapseRoll "Collapse UV"
 		button btn_collapse_triangle "Map triangles for edge mapping"	
 		spinner map_size "Map size (px): " range:[0,2048,1024] type:#integer
 		spinner line_size "Map line size (px): " range:[0,800,256] type:#integer
-		spinner line_thickness "Line thickness (units): " range:[0,800,2] type:#float
+		spinner line_thickness "Line thickness (units): " range:[0,800,1] type:#float
+		checkbox include_invisible "Include invisible edges" checked:false
 	)
-	
 	/*
 	group "Debug" (
 		spinner face_id "Face ID: " range:[1,2048,28] type:#integer
@@ -23,11 +23,13 @@ rollout uvCollapseRoll "Collapse UV"
 		spinner vertex_index "Vertex Index: " range:[1,3,1] type:#integer		
 		button btn_select_vertex "Select mesh vertex"			
 		button btn_select_uv_vertex "Select UV vertex"	
+		spinner edge_index "Edge Index: " range:[1,3,1] type:#integer		
+		button btn_select_edge "Select mesh edge"			
+		button btn_get_edge_visible "Get edge visible"			
 		button btn_open_uvw "Open UVW"	
 		button btn_close_uvw "Close UVW"	
 	)
 	*/
-	
 	--button btn_createtriangles "Create Triangles"
 	--button btn_breakfaces "Break Faces"
 	--button btn_setchannel "Set Channel"
@@ -114,6 +116,40 @@ rollout uvCollapseRoll "Collapse UV"
 		face = getFace $ face_id.value
 		
 		setVertSelection obj #{face[vertex_index.value]}
+	)
+	
+	on btn_select_edge pressed do 
+	(
+		if selection.count != 1 do (
+			messagebox "No object selected"
+			return()	
+		)
+		
+		obj = selection[1]
+		
+		if  isProperty  obj #unwrap_UVW == true do 
+				deleteModifier obj 1
+		
+		subObjectLevel = 2
+		
+		setEdgeSelection $ #{((face_id.value-1)*3)+ edge_index.value}
+	)
+
+	on btn_get_edge_visible pressed do 
+	(
+		if selection.count != 1 do (
+			messagebox "No object selected"
+			return()	
+		)
+		
+		obj = selection[1]
+		
+		if  isProperty  obj #unwrap_UVW == true do 
+				deleteModifier obj 1
+		
+		subObjectLevel = 2
+		
+		format "edge visible: %\n" (getEdgeVis $ face_id.value edge_index.value)
 	)
 	
 	on btn_select_uv_vertex pressed do 
@@ -347,14 +383,42 @@ rollout uvCollapseRoll "Collapse UV"
 			
 		return p0 + (incenter - p0) * r
 	)
+
+	-- return the inset vertex relative to pA-p0 edge where inset is the thickness of the inset in pB-p0
+	fn getHalfInsetVertex pA pB p0 inset =
+	(
+		h = pointLineDist2 pB p0 pA
+		x = inset * length(p0 - pA) / h
+
+		if x > length(p0 - pA) then 
+			return pA
+		else (
+			res = p0 + (pA - p0) * x / length(p0 - pA)
+			--format "getHalfInsetVertex: %\n" res
+			return res
+		)
+	)
 	
-	-- get ratio between thickness and height from edge p1-p2 to p0 inset, diag is a boolean for diagonal UV edge
-	fn getLineTicknessPerc p1 p2 p0 diag =
+	-- get ratio between thickness and height from edge p1-p2 to p3 inset, edge_indexi is the index of the edge pi in the face
+	fn getLineTicknessPerc p1 p2 p3 face edge_index1 edge_index2 edge_index3 =
 	(
 		line_t = float(line_thickness.value)
-		
+
 		-- get distance of p0 from segment p1-p2 (height of the triangle respective to p1-p2 segment)
-		inset = getInsetVertex p1 p2 p0 line_t
+		if include_invisible.checked == true then
+			inset = getInsetVertex p1 p2 p3 line_t
+		else
+		(
+			if getEdgeVis $ face edge_index2 == false and getEdgeVis $ face edge_index3 == false then
+				inset = p3
+			else if getEdgeVis $ face edge_index2 == false then
+				inset = getHalfInsetVertex p2 p1 p3 line_t
+			else if getEdgeVis $ face edge_index3 == false then
+				inset = getHalfInsetVertex p1 p2 p3 line_t
+			else
+				inset = getInsetVertex p1 p2 p3 line_t
+		)
+
 		h = pointLineDist2 p1 p2 inset
 		k = line_t / h
 		
@@ -370,7 +434,7 @@ rollout uvCollapseRoll "Collapse UV"
 	)
 	
 	-- get UV offsets of triangle p1-p2-p3 given k1 k2 k3 line thickness ratios
-	fn getTriangleOffsets p1 p2 p3 k1 k2 k3 =
+	fn getTriangleOffsets p1 p2 p3 k1 k2 k3 face =
 	(
 		local root2 = sqrt(2)
 		local line_s  = float(line_size.value)
@@ -381,9 +445,66 @@ rollout uvCollapseRoll "Collapse UV"
 		
 		local l = (map_s - line_s * (2 + root2)) / map_s
 		
-		local e1 = line_s / map_s - l * k1 / (1 - k1)
-		local e2 = line_s / map_s - l * k2 / (1 - k2)
-		local e3 = line_s / map_s - l / root2 * k3 / (1 - k3)
+		if include_invisible.checked == true then
+		(
+			local e1 = line_s / map_s - l * k1 / (1 - k1)
+			local e2 = line_s / map_s - l * k2 / (1 - k2)
+			local e3 = line_s / map_s - l / root2 * k3 / (1 - k3)
+		)
+		else
+		(
+			--format "getTriangleOffsets face:%\n" face
+
+			if getEdgeVis $ face 2 == false and getEdgeVis $ face 3 == false then (
+				ll = l - l * 0.1  - l * 0.1 * root2
+				--format "a\n"
+			)
+			else if getEdgeVis $ face 2 == false then (
+				ll = l - l * 0.1
+				--format "b\n"
+			)
+			else if getEdgeVis $ face 3 == false then (
+				ll = l - l * 0.1 * root2
+				--format "c\n"
+			)
+			else (
+				ll = l 
+				--format "d\n"
+			)
+			local e1 = line_s / map_s - ll * k1 / (1 - k1)
+
+			if getEdgeVis $ face 1 == false and getEdgeVis $ face 3 == false then (
+				ll = l - l * 0.1  - l * 0.1 * root2
+				--format "a\n"
+			)
+			else if getEdgeVis $ face 1 == false then (
+				ll = l - l * 0.1
+				--format "b\n"
+			)
+			else if getEdgeVis $ face 3 == false then (
+				ll = l - l * 0.1 * root2
+				--format "c\n"
+			)
+			else (
+				ll = l 
+				--format "d\n"
+			)
+			local e2 = line_s / map_s - ll * k2 / (1 - k2)
+
+			if getEdgeVis $ face 1 == false and getEdgeVis $ face 2 == false then (
+				ll = l / root2 - l * 0.1 * root2
+				--format "a\n"
+			)
+			else if getEdgeVis $ face 1 == false or getEdgeVis $ face 2 == false then (
+				ll = l * 0.9 / root2
+				--format "b\n"
+			)
+			else (
+				ll = l / root2
+				--format "c\n"
+			)
+			local e3 = line_s / map_s - ll * k3 / (1 - k3)
+		)
 			
 		return [e1, e2, e3]
 	)
@@ -405,7 +526,7 @@ rollout uvCollapseRoll "Collapse UV"
 			if  isProperty  obj #unwrap_UVW == true do 
 				deleteModifier obj 1
 			
-			showAllEdges()
+			--showAllEdges()
 			
 			unwrap = unwrap_UVW()
 			addmodifier obj unwrap
@@ -417,7 +538,7 @@ rollout uvCollapseRoll "Collapse UV"
 				
 			for face in #{1..obj.numfaces} do
 			(
-				format "Face %...\n" face
+				--format "Face %...\n" face
 				
 				-- get mesh vertex indexes for current face
 				meshverts = getFace $ face
@@ -428,20 +549,29 @@ rollout uvCollapseRoll "Collapse UV"
 				mv3 = getVert obj meshverts[3]
 				
 				-- get offsets for each face edge
-				k1 = getLineTicknessPerc mv1 mv2 mv3 0
-				k2 = getLineTicknessPerc mv2 mv3 mv1 0
-				k3 = getLineTicknessPerc mv1 mv3 mv2 1
+				k1 = getLineTicknessPerc mv1 mv2 mv3 face 1 2 3
+				k2 = getLineTicknessPerc mv2 mv3 mv1 face 2 3 1
+				k3 = getLineTicknessPerc mv1 mv3 mv2 face 1 3 2
 				
-				format "tickness: (%, %, %)\n" k1 k2 k3
+				--format "tickness: (%, %, %)\n" k1 k2 k3
 				
 				line_s  = float(line_size.value)
 				map_s = float(map_size.value)
 				
-				offsets = getTriangleOffsets mv1 mv2 mv3 k1 k2 k3
-				format "Edge offsets: %\n" offsets
-				eo1 = offsets[1]
-				eo2 = offsets[2]
-				eo3 = offsets[3]
+				offsets = getTriangleOffsets mv1 mv2 mv3 k1 k2 k3 face
+				--format "Edge offsets: %\n" offsets
+				local eo1 = offsets[1]
+				local eo2 = offsets[2]
+				local eo3 = offsets[3]
+
+				if include_invisible.checked == false then
+				(
+					local l = line_s / map_s
+					local m = (map_s - line_s * (2 + sqrt(2))) / map_s / 10
+					if getEdgeVis $ face 1 == false then eo1 = l + m
+					if getEdgeVis $ face 2 == false then eo2 = l + m
+					if getEdgeVis $ face 3 == false then eo3 = l + m
+				)
 				
 				-- get map face vertex indexes				
 				uv1 = obj.unwrap_UVW.getVertexIndexFromFace face 1
@@ -468,5 +598,5 @@ rollout uvCollapseRoll "Collapse UV"
 	)
 )	
 
-toolsFloater = newRolloutFloater "UV Tools" 250 210
+toolsFloater = newRolloutFloater "UV Tools" 250 550
 addRollout uvCollapseRoll toolsFloater
