@@ -3,6 +3,8 @@ try(closeRolloutFloater toolsFloater)catch()
 
 rollout uvCollapseRoll "Collapse UV"
 (	
+	spinner uv_channel "UV Channel: " range:[1,10,3] type:#integer
+
 	--button btn_randomw "Set Random W"	
 	group "Face Indexing" (
 		button btn_collapse "Collapse UV to random point"		
@@ -89,7 +91,7 @@ rollout uvCollapseRoll "Collapse UV"
 			unwrap = unwrap_UVW()
 			addmodifier obj unwrap
 			
-			goToMapChannel 3
+			goToMapChannel uv_channel.value
 			
 			unwrap.edit ()
 		)
@@ -174,7 +176,7 @@ rollout uvCollapseRoll "Collapse UV"
 			unwrap = unwrap_UVW()
 			addmodifier $ unwrap
 			
-			goToMapChannel 3
+			goToMapChannel uv_channel.value
 			
 			unwrap.edit ()
 		)
@@ -254,7 +256,7 @@ rollout uvCollapseRoll "Collapse UV"
 		unwrap = unwrap_UVW()
 		addmodifier obj unwrap
 		
-		obj.unwrap_UVW.setMapChannel 3
+		obj.unwrap_UVW.setMapChannel uv_channel.value
 	)
 	
 	on btn_randomw pressed do 
@@ -275,7 +277,7 @@ rollout uvCollapseRoll "Collapse UV"
 			
 			unwrap = unwrap_UVW()
 			addmodifier obj unwrap
-			obj.unwrap_UVW.setMapChannel 3
+			obj.unwrap_UVW.setMapChannel goToMapChannel uv_channel.value
 			
 			breakFaces()
 			
@@ -323,7 +325,7 @@ rollout uvCollapseRoll "Collapse UV"
 			
 			unwrap = unwrap_UVW()
 			addmodifier obj unwrap
-			obj.unwrap_UVW.setMapChannel 3
+			obj.unwrap_UVW.setMapChannel uv_channel.value
 			
 			breakFaces()
 			
@@ -530,7 +532,7 @@ rollout uvCollapseRoll "Collapse UV"
 			
 			unwrap = unwrap_UVW()
 			addmodifier obj unwrap
-			obj.unwrap_UVW.setMapChannel 3
+			obj.unwrap_UVW.setMapChannel uv_channel.value
 			
 			breakFaces()
 			
