@@ -5,11 +5,6 @@ rollout uvCollapseRoll "Collapse UV"
 (	
 	spinner uv_channel "UV Channel: " range:[1,10,3] type:#integer
 
-	--button btn_randomw "Set Random W"	
-	group "Face Indexing" (
-		button btn_collapse "Collapse UV to random point"		
-	)
-	
 	group "Show Triangular Edges" (
 		button btn_collapse_triangle "Map triangles for edge mapping"	
 		spinner map_size "Map size (px): " range:[0,2048,1024] type:#integer
@@ -17,9 +12,10 @@ rollout uvCollapseRoll "Collapse UV"
 		spinner line_thickness "Line thickness (units): " range:[0,800,1] type:#float
 		checkbox include_invisible "Include invisible edges" checked:false
 	)
+
 	/*
 	group "Debug" (
-		spinner face_id "Face ID: " range:[1,2048,28] type:#integer
+		spinner face_id "Face ID: " range:[1,2048,1] type:#integer
 		button btn_select_face "Select mesh face"	
 		button btn_select_uv_face "Select UV face"	
 		spinner vertex_index "Vertex Index: " range:[1,3,1] type:#integer		
@@ -32,18 +28,26 @@ rollout uvCollapseRoll "Collapse UV"
 		button btn_close_uvw "Close UVW"	
 	)
 	*/
-	--button btn_createtriangles "Create Triangles"
-	--button btn_breakfaces "Break Faces"
-	--button btn_setchannel "Set Channel"
-	
-	on btn_select_face pressed do 
+
+	fn getObjectSelected =
 	(
-		if selection.count != 1 do (
+		if selection.count == 0 do (
 			messagebox "No object selected"
 			return()	
 		)
-		
-		obj = selection[1]
+
+		if selection.count > 1 do (
+			messagebox "You must select a single object"
+			return()	
+		)
+
+		return selection[1]
+	)
+
+	on btn_select_face pressed do 
+	(
+		obj = getObjectSelected()
+		if obj == undefined do return()
 		
 		if  isProperty  obj #unwrap_UVW == true do 
 				deleteModifier obj 1
@@ -79,12 +83,8 @@ rollout uvCollapseRoll "Collapse UV"
 	
 	on btn_select_uv_face pressed do 
 	(
-		if selection.count != 1 do (
-			messagebox "No object selected"
-			return()	
-		)
-		
-		obj = selection[1]
+		obj = getObjectSelected()
+		if obj == undefined do return()
 		
 		if  isProperty  obj #unwrap_UVW == false do 
 		(
@@ -103,12 +103,8 @@ rollout uvCollapseRoll "Collapse UV"
 
 	on btn_select_vertex pressed do 
 	(
-		if selection.count != 1 do (
-			messagebox "No object selected"
-			return()	
-		)
-		
-		obj = selection[1]
+		obj = getObjectSelected()
+		if obj == undefined do return()
 		
 		if  isProperty  obj #unwrap_UVW == true do 
 				deleteModifier obj 1
@@ -122,12 +118,8 @@ rollout uvCollapseRoll "Collapse UV"
 	
 	on btn_select_edge pressed do 
 	(
-		if selection.count != 1 do (
-			messagebox "No object selected"
-			return()	
-		)
-		
-		obj = selection[1]
+		obj = getObjectSelected()
+		if obj == undefined do return()
 		
 		if  isProperty  obj #unwrap_UVW == true do 
 				deleteModifier obj 1
@@ -139,12 +131,8 @@ rollout uvCollapseRoll "Collapse UV"
 
 	on btn_get_edge_visible pressed do 
 	(
-		if selection.count != 1 do (
-			messagebox "No object selected"
-			return()	
-		)
-		
-		obj = selection[1]
+		obj = getObjectSelected()
+		if obj == undefined do return()
 		
 		if  isProperty  obj #unwrap_UVW == true do 
 				deleteModifier obj 1
@@ -156,12 +144,8 @@ rollout uvCollapseRoll "Collapse UV"
 	
 	on btn_select_uv_vertex pressed do 
 	(
-		if selection.count != 1 do (
-			messagebox "No object selected"
-			return()	
-		)
-		
-		obj = selection[1]
+		obj = getObjectSelected()
+		if obj == undefined do return()
 		
 		subObjectLevel = 1
 		
@@ -179,7 +163,7 @@ rollout uvCollapseRoll "Collapse UV"
 			goToMapChannel uv_channel.value
 			
 			unwrap.edit ()
-		)
+		) 
 	)
 	
 	on btn_close_uvw pressed do 
@@ -188,16 +172,9 @@ rollout uvCollapseRoll "Collapse UV"
 			deleteModifier $ 1
 	)
 	
-	fn showAllEdges =
+	fn showAllEdges obj =
 	(
 		print "Setting edges visible..."
-			
-		if selection.count != 1 do (
-			messagebox "No object selected"
-			return()	
-		)
-		
-		obj = selection[1]
 		
 		obj.allEdges = true -- Show all edges
 		select obj -- Select the mesh
@@ -208,10 +185,8 @@ rollout uvCollapseRoll "Collapse UV"
 					setEdgeVis obj face edge true
 	)
 	
-	fn breakFaces =
-	(		
-		obj = selection[1]
-		
+	fn breakFaces obj =
+	(
 		if  obj.unwrap_UVW == undefined do return()
 		
 		print "Breaking faces..."
@@ -225,134 +200,6 @@ rollout uvCollapseRoll "Collapse UV"
 			--format "breaking face %...\n" face
 			obj.unwrap_UVW.selectFaces #{face}
 			obj.unwrap_UVW.breakSelected() 
-		)
-	)
-	
-	on btn_createtriangles pressed do 
-	(
-		undo on
-		(
-			showAllEdges ()
-		)
-	)
-	
-	on btn_breakfaces pressed do 
-	(
-		breakFaces()
-	)
-	
-	on btn_setchannel pressed do 
-	(
-		if selection.count != 1 do (
-			messagebox "No object selected"
-			return()	
-		)
-		
-		obj = selection[1]
-		
-		if  isProperty  obj #unwrap_UVW == true do 
-				deleteModifier obj 1
-			
-		unwrap = unwrap_UVW()
-		addmodifier obj unwrap
-		
-		obj.unwrap_UVW.setMapChannel uv_channel.value
-	)
-	
-	on btn_randomw pressed do 
-	(
-		if selection.count != 1 do (
-			messagebox "No object selected"
-			return()	
-		)
-		
-		obj = selection[1]
-		
-		undo on
-		(
-			if  isProperty  obj #unwrap_UVW == true do 
-				deleteModifier obj 1
-			
-			--showAllEdges()
-			
-			unwrap = unwrap_UVW()
-			addmodifier obj unwrap
-			obj.unwrap_UVW.setMapChannel goToMapChannel uv_channel.value
-			
-			breakFaces()
-			
-			obj.unwrap_UVW.selectFaces #{1..obj.numfaces}
-			
-			for face in obj.unwrap_UVW.getSelectedFaces() do
-			(
-				format "face (%)\n" face
-				
-				obj.unwrap_UVW.selectFaces #{face}
-				obj.unwrap_UVW.faceToVertSelect()
-				
-				local w = random 0.0 1.0
-				
-				format "Setting w = (%)\n" w
-				
-				for ver in obj.unwrap_UVW.getSelectedVertices() do
-				(
-					vp = obj.unwrap_UVW.getVertexPosition 0 ver
-					format "vertex (%) pos: % %\n" ver vp.x vp.y
-					
-					obj.unwrap_UVW.SetVertexPosition 0 ver [vp.x, vp.y, w]
-				)
-			)
-			
-			obj.unwrap_UVW.selectFaces #{}
-		)		
-	)
-	
-	on btn_collapse pressed do 
-	(
-		if selection.count != 1 do (
-			messagebox "No object selected"
-			return()	
-		)
-		
-		obj = selection[1]
-		
-		undo on
-		(
-			if  isProperty  obj #unwrap_UVW == true do 
-				deleteModifier obj 1
-			
-			--showAllEdges()
-			
-			unwrap = unwrap_UVW()
-			addmodifier obj unwrap
-			obj.unwrap_UVW.setMapChannel uv_channel.value
-			
-			breakFaces()
-			
-			obj.unwrap_UVW.selectFaces #{1..obj.numfaces}
-			
-			for face in obj.unwrap_UVW.getSelectedFaces() do
-			(
-				--format "face (%)\n" face
-				
-				obj.unwrap_UVW.selectFaces #{face}
-				obj.unwrap_UVW.faceToVertSelect()
-				
-				local u = random 0.0 1.0
-				local v = random 0.0 1.0
-				
-				--format "Setting uv = (%,%)\n" u v
-				
-				for ver in obj.unwrap_UVW.getSelectedVertices() do
-				(
-					vp = obj.unwrap_UVW.getVertexPosition 0 ver
-					--format "vertex (%) pos: % %\n" ver vp.x vp.y
-					
-					obj.unwrap_UVW.SetVertexPosition 0 ver [u, v, 0]
-				)
-			)
-			
-			obj.unwrap_UVW.selectFaces #{}
 		)
 	)
 	
@@ -514,12 +361,8 @@ rollout uvCollapseRoll "Collapse UV"
 	-- creates UV coords for each triangle in order to obtain constant thickness edge lines
 	on btn_collapse_triangle pressed do 
 	(
-		if selection.count != 1 do (
-			messagebox "No object selected"
-			return()	
-		)
-		
-		obj = selection[1]
+		obj = getObjectSelected()
+		if obj == undefined do return()
 		
 		clearListener()
 		
