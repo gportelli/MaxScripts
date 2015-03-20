@@ -1,8 +1,10 @@
 ##A Collection of Scripts for 3D Studio Max
 
-Scripts in the root folder may include files from the includes folder.
-You can include a file in your script adding at the top of your script something like this:
-*fileIn (getFilenamePath(getThisScriptFilename()) + "includes/TFBT_Lib.ms")*
+Scripts in the *scripts* folder may include files from the *includes* folder.
+
+To include a file in your script, just add something like this on top of your script:
+
+*fileIn (getFilenamePath(getThisScriptFilename()) + "../includes/TFBT_Lib.ms")*
 
 **Instructions:**
 
