@@ -2,15 +2,19 @@ struct TFBT_ProgressManager
 (
     private
 
-		lastProgress=0,
+	lastProgress=0,
 	iteration=0,
 	totalIterations=0,
 	progressBarInst,
+	semaphoreBitmapInst,
 	labelInst,
 	startTime,
 	lastTime,
 	lastIteration,
 	eta,
+	errorBm = bitmap 15 15 color:red,
+	okBm    = bitmap 15 15 color:green,
+	waitBm  = bitmap 15 15 color:orange,
 
 	fn formatTime time =
 	(
@@ -34,14 +38,16 @@ struct TFBT_ProgressManager
         lastProgress = 0	 
         progressBarInst = undefined
         labelInst = undefined 
+        semaphoreBitmapInst = undefined
 
         return true
     ),
 
-    fn Init progressBarInstance labelInstance =
+    fn Init progressBarInstance labelInstance semaphoreBitmapInstance=
 	(
 		progressBarInst = progressBarInstance
 		labelInst = labelInstance
+		semaphoreBitmapInst = semaphoreBitmapInstance
 
 		lastProgress = 0
 		iteration = 0
@@ -50,6 +56,15 @@ struct TFBT_ProgressManager
 
 		startTime = timeStamp()
 		lastTime = startTime
+
+		if progressBarInst != undefined then
+			progressBarInst.value = 0
+
+		if semaphoreBitmapInst != undefined then
+			semaphoreBitmapInst.bitmap = okBm
+
+		if labelInst != undefined then
+			labelInst.text = "Ready"
 	),
 
 	fn Start total =
@@ -57,7 +72,11 @@ struct TFBT_ProgressManager
 		totalIterations = total
 
 		if progressBarInst != undefined then
-			progressBarInst.color = orange			
+			progressBarInst.color = orange	
+
+		if semaphoreBitmapInst != undefined then
+			semaphoreBitmapInst.bitmap = waitBm
+		windows.processPostedMessages()		
 	),
 
 	fn UpdateProgress =
@@ -95,7 +114,7 @@ struct TFBT_ProgressManager
 			lastIteration = iteration
 		)
 
-		true
+		not keyboard.escPressed
 	),
 
 	fn EndProgress =
@@ -108,6 +127,9 @@ struct TFBT_ProgressManager
 
 		if labelInst != undefined then
 			labelInst.text = "Complete!"
+
+		if semaphoreBitmapInst != undefined then
+			semaphoreBitmapInst.bitmap = okBm
 	),
 
     initalized = Constructor() -- This will be executed when this struct is created the first time.	   

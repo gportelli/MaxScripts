@@ -1,8 +1,15 @@
-struct TFBT_UVCollapser
+if TFBT_Utils == undefined then 
+	fileIn (getFilenamePath(getThisScriptFilename()) + "TFBT_Utils.ms")
+
+struct TFBT_UVWCollapser
 (		
 	private
 
 	msgLabelInst,
+	semaphoreBitmapInst,
+	errorBm = bitmap 15 15 color:red,
+	okBm    = bitmap 15 15 color:green,
+	waitBm  = bitmap 15 15 color:orange,
 
 	fn compareLODNames l1 l2 =
 	(
@@ -14,9 +21,11 @@ struct TFBT_UVCollapser
 		) 
 	),
 
-	fn displayMsg msg =
+	fn displayMsg msg error:false =
 	(
-		if msgLabelIns != undefined then msgLabelInst.text = msg
+		if msgLabelInst != undefined then msgLabelInst.text = msg
+
+		if semaphoreBitmapInst != undefined and error == true then semaphoreBitmapInst.bitmap = errorBm
 
 		return msg
 	),
@@ -64,19 +73,6 @@ struct TFBT_UVCollapser
 		-1
 	),
 
-	fn getMeshFaceVertices mesh faceid =
-	(
-		-- get mesh vertex indexes for faceid
-		meshverts = getFace mesh faceid
-		
-		-- get mesh vertex positions for curent face
-		mv1 = getVert mesh meshverts[1]
-		mv2 = getVert mesh meshverts[2]
-		mv3 = getVert mesh meshverts[3]
-
-		#(mv1, mv2, mv3)
-	),
-
 	public
 
 	fn Constructor =
@@ -86,6 +82,7 @@ struct TFBT_UVCollapser
         totalIterations = 0
         lastProgress = 0	 
         progressBarInst = undefined
+
         labelInst = undefined 
 
         return true
@@ -95,7 +92,7 @@ struct TFBT_UVCollapser
 	* Collapses UVW per face in the objects array of editable meshes
 	*
 	* objects: array of editable meshes
-	* uvGeneratorFunction: function used to generate (u, v, w) for each face - function paradigm: uvGeneratorFunction(#(v1, v2, v3), faceid) -> [u, v, w]
+	* uvGeneratorFunction: function used to generate (u, v, w) for each face - function paradigm: uvGeneratorFunction(mesh, faceid) -> [u, v, w]
 	* channel: uvw destination channel
 	* includeLODs: if set to true objects are sorted according to their _LOD* suffix; each face in LOD[i] is searched in LOD[j>i] in order to maintain the same UVW coordinates for matching LOD faces
 	* progressBarInstance: [optional] a progressBar instance to show the operation progress
@@ -103,15 +100,24 @@ struct TFBT_UVCollapser
 	*
 	* return value: empty string if the operation was successful, error string if an error occurred
 	*/
-	fn CollapseUVW objects uvGeneratorFunction channel includeLODs:false progressBarInstance:undefined msgLabelInstance:undefined =
-	(	
+	fn CollapseUVW objects uvGeneratorFunction channel includeLODs:false progressBarInstance:undefined msgLabelInstance:undefined semaphoreBitmapInstance:undefined =
+	(			
+		msgLabelInst = msgLabelInstance
+		semaphoreBitmapInst = semaphoreBitmapInstance
+
 		local progManager = TFBT_ProgressManager()
-		progManager.Init progressBarInstance msgLabelInstance
+		progManager.Init progressBarInstance msgLabelInstance semaphoreBitmapInstance
+
+		local utils = TFBT_Utils()
 
 		-- objects check
 		if (objects.count == 0) then			
-			return displayMsg "Select at least One Object!"
+			return displayMsg "Select at least One Object!" error:true
 		
+		for obj in selection do
+			if not utils.IsEditableMesh obj then 
+				return displayMsg (obj.name + "\nis not an editable mesh") error:true
+
 		/*
 		// Include LODs version
 		*/
@@ -131,8 +137,8 @@ struct TFBT_UVCollapser
 					index = index + 1
 				)
 				else (
-					msg = obj.name + " is not a LOD!"
-					return msg
+					msg = obj.name + "\nis not a LOD!"
+					return displayMsg msg error:true
 				)
 			)
 
@@ -140,7 +146,7 @@ struct TFBT_UVCollapser
 			qsort lods compareLODNames
 
 			if lods.count == 0 then 
-				return displayMsg "No lods found"
+				return displayMsg "No lods found" error:true
 
 			
 			-- create bitarrays to flag processed faces
@@ -175,7 +181,7 @@ struct TFBT_UVCollapser
 							format "processing face % of LOD%\n" face (i-1)
 							processedFaces[i][face] = true
 
-							uvs = uvGeneratorFunction (getMeshFaceVertices lods[i] face) face
+							uvs = uvGeneratorFunction lods[i] face
 
 							unwraps[i].unwrap2.selectFaces #{face}
 							unwraps[i].unwrap.breakSelected()
@@ -250,7 +256,7 @@ struct TFBT_UVCollapser
 
 					for face=1 to obj.numfaces do
 					(
-						local uvs = uvGeneratorFunction (getMeshFaceVertices obj face) face
+						local uvs = uvGeneratorFunction obj face
 
 						unwMod.unwrap2.selectFaces #{face}
 						unwMod.unwrap.breakSelected()
@@ -262,7 +268,7 @@ struct TFBT_UVCollapser
 						)
 						for ver in vertArr do (unwMod.unwrap.SetVertexPosition 0 ver [uvs[1], uvs[2], uvs[3]])
 
-						if progManager.UpdateProgress() == false do return()
+						if progManager.UpdateProgress() == false then return()
 					)
 
 					unwMod.unwrap.selectVertices #{}

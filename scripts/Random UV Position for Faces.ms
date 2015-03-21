@@ -3,11 +3,9 @@ fileIn (getFilenamePath(getThisScriptFilename()) + "../includes/TFBT_UVWCollapse
 
 global RNDUVFloater
 
-Rollout RNDUV_roll "Parameters"
+Rollout RNDUVW_roll "Parameters"
 (	
-	local Wrbm = bitmap 15 15 color:red
 	local Okbm = bitmap 15 15 color:green
-	local Waitbm = bitmap 15 15 color:orange
 	
 	-- random seed
 	label lbSd "Seed..................." align:#left offset:[-3,3]
@@ -17,32 +15,32 @@ Rollout RNDUV_roll "Parameters"
 	label lbCh "UV Channel..........." align:#left offset:[-3,5]
 	spinner spCh range:[1, 99, 3] type:#integer fieldwidth:60 align:#left offset:[96,-19]
 	
-	checkbox include_lods "Include LODs" checked:false
+	checkbox cbIncludeLods "Include LODs" checked:false
 
-	button btRandomUV "Random UV" width:100 height:20 align:#center --offset:[-8,0]	
+	button btRandomUVW "Random UVW" width:100 height:20 align:#center --offset:[-8,0]	
 
 	groupBox grpSep1 width:188 height:7 offset:[-14,-4] 
 	progressBar progBar value:0 color:green height:5
 	imgTag imtWrn bitmap:Okbm align:#left offset:[-8,0]
 	label lbWrn "Ready" align:#left offset:[14,-19] height:30
 
-	fn uvGeneratorFunction vertices faceid =
+	fn uvGeneratorFunction mesh faceid =
 	(
 		return [(random 0.0 1.0), (random 0.0 1.0), (random 0.0 1.0)]
 	)
 
-	on btRandomUV pressed do
+	on btRandomUVW pressed do
 	(
-		clearListener()
+		clearListener()		
 
 		local utils = TFBT_Utils()
 		utils.DisableProcessWindowsGhosting()
 
-		local collapser = TFBT_UVCollapser()
-		collapser.CollapseUVW selection uvGeneratorFunction spCh.value progressBarInstance:progBar msgLabelInstance:lbWrn includeLODs:include_lods.checked
+		local collapser = TFBT_UVWCollapser()
+		local result = collapser.CollapseUVW selection uvGeneratorFunction spCh.value includeLODs:cbIncludeLods.checked msgLabelInstance:lbWrn progressBarInstance:progBar semaphoreBitmapInstance:imtWrn
 	)
 )
 
-if (RNDUVFloater != undefined) then CloseRolloutFloater RNDUVFloater
-RNDUVFloater = NewRolloutFloater "RND UV" 200 200
-addRollout RNDUV_roll RNDUVFloater
+if (RNDUVWFloater != undefined) then CloseRolloutFloater RNDUVWFloater
+RNDUVWFloater = NewRolloutFloater "RND UVW" 200 200
+addRollout RNDUVW_roll RNDUVWFloater
