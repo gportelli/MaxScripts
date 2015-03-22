@@ -73,6 +73,13 @@ struct TFBT_UVWCollapser
 		-1
 	),
 
+	fn breakAllFaces uvw_Unwrap nfaces =
+	(
+		uvw_Unwrap.setTVSubObjectMode 2
+		uvw_Unwrap.selectEdges  #{1..(nfaces * 3)}
+		uvw_Unwrap.breakSelected()
+	),
+
 	public
 
 	fn Constructor =
@@ -160,11 +167,11 @@ struct TFBT_UVWCollapser
 			for i=1 to lods.count do (
 				unwraps[i] = unwrap_UVW()				
 
-				unwraps[i].name = "Collapsed UVW Ch : " + (spCh.value as string)
-				unwraps[i].unwrap.setMapChannel spCh.value
+				unwraps[i].name = "Collapsed UVW Ch : " + (channel as string)
+				unwraps[i].unwrap.setMapChannel channel
 				addmodifier lods[i] unwraps[i]
-
-				unwraps[i].setTVSubObjectMode 3
+				breakAllFaces unwraps[i] lods[i].numfaces
+				unwraps[i].setTVSubObjectMode 1
 			)
 
 			local total = 0
@@ -178,13 +185,10 @@ struct TFBT_UVWCollapser
 					(
 						if processedFaces[i][face] == false do
 						(
-							format "processing face % of LOD%\n" face (i-1)
+							--format "processing face % of LOD%\n" face (i-1)
 							processedFaces[i][face] = true
 
 							uvs = uvGeneratorFunction lods[i] face
-
-							unwraps[i].unwrap2.selectFaces #{face}
-							unwraps[i].unwrap.breakSelected()
 
 							local vertArr = #(
 								(unwraps[i].getVertexIndexFromFace face 1),
@@ -201,11 +205,8 @@ struct TFBT_UVWCollapser
 
 								if matchFace != -1 do
 								(
-									format "- found match with face % of LOD%\n" matchFace (j-1)
+									--format "- found match with face % of LOD%\n" matchFace (j-1)
 									processedFaces[j][matchFace] = true;
-
-									unwraps[j].unwrap2.selectFaces #{matchFace}
-									unwraps[j].unwrap.breakSelected()
 
 									local vertArr = #(
 										(unwraps[j].getVertexIndexFromFace matchFace 1),
@@ -249,17 +250,11 @@ struct TFBT_UVWCollapser
 					unwMod.unwrap.setMapChannel channel
 					addmodifier obj unwMod
 
-					unwMod.setTVSubObjectMode 3
-
-					unwMod.unwrap.selectVertices #{}
-					unwMod.unwrap2.selectFaces #{}
+					breakAllFaces unwMod obj.numfaces
 
 					for face=1 to obj.numfaces do
 					(
 						local uvs = uvGeneratorFunction obj face
-
-						unwMod.unwrap2.selectFaces #{face}
-						unwMod.unwrap.breakSelected()
 
 						local vertArr = #(
 							(unwMod.getVertexIndexFromFace face 1),
@@ -273,6 +268,7 @@ struct TFBT_UVWCollapser
 
 					unwMod.unwrap.selectVertices #{}
 					unwMod.unwrap2.selectFaces #{}
+					unwMod.setTVSubObjectMode 3
 				)
 
 				displayMsg "Complete!"
