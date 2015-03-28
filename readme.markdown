@@ -6,6 +6,18 @@ To include a file in your script, just add something like this on top of your sc
 
 *fileIn (getFilenamePath(getThisScriptFilename()) + "../includes/TFBT_Lib.ms")*
 
+Here is a Sublime Text snippet you can use to include a script:
+
+    <snippet>
+        <content><![CDATA[
+            if $1 == undefined then 
+            fileIn (getFilenamePath(getThisScriptFilename()) + "${2:../includes/}$1.ms")
+            ]]></content>
+        <tabTrigger>maxinclude</tabTrigger>
+        <description>Maxscript include file at runtime</description>
+    </snippet>
+
+
 **Instructions:**
 
 type in the terminal:
