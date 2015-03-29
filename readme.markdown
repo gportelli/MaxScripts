@@ -14,7 +14,7 @@ Here is a Sublime Text snippet you can use to include a script:
             fileIn (getFilenamePath(getThisScriptFilename()) + "${2:../includes/}$1.ms")
             ]]></content>
         <tabTrigger>include</tabTrigger>
-        <description>Maxscript include file at runtime</description>
+        <description>Include a maxscript file at runtime</description>
     </snippet>
 
 
