@@ -13,7 +13,7 @@ Here is a Sublime Text snippet you can use to include a script:
             if $1 == undefined then 
             fileIn (getFilenamePath(getThisScriptFilename()) + "${2:../includes/}$1.ms")
             ]]></content>
-        <tabTrigger>maxinclude</tabTrigger>
+        <tabTrigger>include</tabTrigger>
         <description>Maxscript include file at runtime</description>
     </snippet>
 
