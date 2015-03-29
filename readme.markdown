@@ -10,9 +10,9 @@ Here is a Sublime Text snippet you can use to include a script:
 
     <snippet>
         <content><![CDATA[
-            if $1 == undefined then 
-            fileIn (getFilenamePath(getThisScriptFilename()) + "${2:../includes/}$1.ms")
-            ]]></content>
+    if $1 == undefined then 
+        fileIn (getFilenamePath(getThisScriptFilename()) + "${2:../includes/}$1.ms")
+    ]]></content>
         <tabTrigger>include</tabTrigger>
         <description>Include a maxscript file at runtime</description>
     </snippet>
