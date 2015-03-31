@@ -1,0 +1,202 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"msgLabelIns",
+				"msgLabelInst"
+			],
+			[
+				"getEdge",
+				"getEdgeVis"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 81.0,
+		"selected_items":
+		[
+			[
+				"maxs",
+				"Set Syntax: MaxScript"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"lua",
+				"Set Syntax: Lua"
+			],
+			[
+				"c++",
+				"Set Syntax: C++"
+			]
+		],
+		"width": 400.0
+	},
+	"console":
+	{
+		"height": 125.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/C/Users/Giuseppe/AppData/Roaming/Sublime Text 2/Packages/Send to 3ds Max/include.sublime-snippet",
+		"/C/Users/Giuseppe/Documents/Progetti/Maxscripts/scripts/Random UV Position for Faces.ms",
+		"/C/Users/Giuseppe/Documents/Progetti/Maxscripts/includes/TFBT_Lib.ms",
+		"/C/Users/Giuseppe/Documents/Progetti/Maxscripts/includes/TFBT_Utils.ms",
+		"/C/Users/Giuseppe/Documents/Progetti/Maxscripts/includes/TFBT_ProgressManager.ms",
+		"/C/Users/Giuseppe/Documents/Progetti/Maxscripts/includes/TFBT_UVWCollapser.ms",
+		"/C/Users/Giuseppe/Documents/Progetti/Maxscripts/.gitignore",
+		"/C/Users/Giuseppe/Documents/Progetti/Maxscripts/readme.markdown",
+		"/C/Users/Giuseppe/Documents/Progetti/Maxscripts/Random UV Position for Faces.ms",
+		"/C/Users/Giuseppe/Documents/Progetti/Maxscripts/collapseuv.ms",
+		"/C/Users/Giuseppe/Documents/Progetti/Maxscripts/includes/TFBT_ProgressManager",
+		"/C/Users/Giuseppe/AppData/Roaming/Skype/My Skype Received Files/004  DisableWindowGhosting Win8.ms",
+		"/C/Users/Giuseppe/AppData/Roaming/Skype/My Skype Received Files/006  RTT classico 2.5.ms",
+		"/C/Users/Giuseppe/Documents/Progetti/Maxscripts/104  Random UV Position for Faces.ms",
+		"/C/Users/Giuseppe/AppData/Roaming/Skype/My Skype Received Files/104  Random UV Position for Faces.ms",
+		"/C/Users/Giuseppe/Documents/Progetti/EventHorizon/RTG/Hangar/Hangar Panels/Hangar Panels/ue material.txt",
+		"/C/Users/Giuseppe/Desktop/Simple.t3d",
+		"/C/Users/Giuseppe/Documents/Progetti/Maxscripts/external scripts/josbalcaen_batch_exporter_importer.mse",
+		"/G/Backup/Backup Laptop/Progetti/UN Women Scorm/sources/imsmanifest.xml",
+		"/G/Backup/Backup Laptop/Progetti/UN Women Scorm/sources/LMS_start.html",
+		"/G/Backup/Backup Laptop/Progetti/UN Women Scorm/sources/scripts/APIWrapper2.js",
+		"/G/Backup/Backup Laptop/Progetti/UN Women Scorm/sources/scripts/APIWrapper.js",
+		"/C/Users/Giuseppe/Desktop/imsmanifest.xml",
+		"/C/Users/Giuseppe/Documents/Progetti/Unreal/FlatShaderProject/Misc/shader-maps/generatemap.php",
+		"/C/Users/Giuseppe/Documents/Progetti/Maxscripts/random_vertex_painter.ms",
+		"/C/Users/Giuseppe/Documents/Progetti/Flat Shader/shader-maps/generatemap.php"
+	],
+	"find":
+	{
+		"height": 34.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"spCh.value",
+			"\\",
+			"),\n",
+			"ProgressManager",
+			"lbWrn",
+			"getnum",
+			"#{",
+			"#f",
+			"breakFaces",
+			"scorm",
+			"API_1484_11",
+			"setMapChannel",
+			"goToMapChannel 3",
+			"{ \"keys\": [\"ctrl+e\"], \"command\": \"send_file_to_max\" },\n{ \"keys\": [\"shift+enter\"], \"command\": \"send_selection_to_max\"}",
+			")\n"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"channel",
+			"/",
+			"TFBT_ProgressManager",
+			"progress",
+			"goToMapChannel uv_channel.value"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 0.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"replace":
+	{
+		"height": 62.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"selected_items":
+		[
+		],
+		"width": 380.0
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 150.0,
+	"status_bar_visible": true
+}
