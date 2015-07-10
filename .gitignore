@@ -1,3 +1,5 @@
 external scripts/
 max scenes/
 wip/
+*.sublime-project
+*.sublime-workspace
