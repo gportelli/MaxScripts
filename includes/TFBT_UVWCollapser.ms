@@ -165,6 +165,11 @@ struct TFBT_UVWCollapser
 
 			local unwraps = #()
 			for i=1 to lods.count do (
+				local map = uvwmap()
+				map.maptype = 5
+				map.mapChannel = channel
+				addModifier lods[i] map
+
 				unwraps[i] = unwrap_UVW()				
 
 				unwraps[i].name = "Collapsed UVW Ch : " + (channel as string)
@@ -244,6 +249,12 @@ struct TFBT_UVWCollapser
 
 				for obj in selection do
 				(
+					/* Use a uvwmap of type faces to make sure that all faces are detached */
+					local map = uvwmap()
+					map.mapChannel = channel
+					map.maptype = 5					
+					addModifier obj map
+
 					local unwMod = unwrap_UVW()				
 
 					unwMod.name = "Collapsed UVW Ch : " + (channel as string)

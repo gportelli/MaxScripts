@@ -1,7 +1,7 @@
 fileIn (getFilenamePath(getThisScriptFilename()) + "../includes/TFBT_Lib.ms")
 fileIn (getFilenamePath(getThisScriptFilename()) + "../includes/TFBT_UVWCollapser.ms")
 
-global RNDUVFloater
+global RNDUVWFloater
 
 Rollout RNDUVW_roll "Parameters"
 (	
