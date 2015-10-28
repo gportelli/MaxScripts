@@ -107,7 +107,7 @@ struct TFBT_BarycentricCoords
 	*
 	* return value: empty string if the operation was successful, error string if an error occurred
 	*/
-	fn AddCoords objects channel progressBarInstance:undefined msgLabelInstance:undefined semaphoreBitmapInstance:undefined =
+	fn AddCoords objects channel1 channel2 progressBarInstance:undefined msgLabelInstance:undefined semaphoreBitmapInstance:undefined =
 	(			
 		msgLabelInst = msgLabelInstance
 		semaphoreBitmapInst = semaphoreBitmapInstance
@@ -135,13 +135,13 @@ struct TFBT_BarycentricCoords
 			(
 				local map1 = uvwmap()
 				map1.maptype = 5
-				map1.mapChannel = channel
+				map1.mapChannel = channel1
 				addModifier obj map1
 				
 				local unwMod1 = unwrap_UVW()				
 
-				unwMod1.name = "Barycentric UVW Ch : " + (channel as string)
-				unwMod1.unwrap.setMapChannel channel
+				unwMod1.name = "Barycentric UVW Ch : " + (channel1 as string)
+				unwMod1.unwrap.setMapChannel channel1
 				addmodifier obj unwMod1
 
 				breakAllFaces unwMod1 obj.numfaces
@@ -169,13 +169,13 @@ struct TFBT_BarycentricCoords
 
 				local map2 = uvwmap()
 				map2.maptype = 5
-				map2.mapChannel = (channel + 1)
+				map2.mapChannel = channel2
 				addModifier obj map2
 
 				local unwMod2 = unwrap_UVW()				
 
-				unwMod2.name = "Barycentric UVW Ch : " + ((channel+1) as string)
-				unwMod2.unwrap.setMapChannel (channel+1)
+				unwMod2.name = "Barycentric UVW Ch : " + (channel2 as string)
+				unwMod2.unwrap.setMapChannel channel2
 				addmodifier obj unwMod2
 
 				breakAllFaces unwMod2 obj.numfaces
