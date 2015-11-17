@@ -30,49 +30,6 @@ struct TFBT_BarycentricCoords
 		return msg
 	),
 
-	fn compareFaces obj1 faceid1 obj2 faceid2 epsilon =
-	(
-		local face1 = getFace obj1 faceid1
-		local face2 = getFace obj2 faceid2
-
-		for i=1 to 3 do
-		(
-			local vert1 = in coordsys local getVert obj1 face1[i]
-			local vert2 = in coordsys local getVert obj2 face2[i]
-
-			if (distance vert1 vert2) > epsilon then return false
-		)
-
-		true
-	),
-
-	fn findFaceMatch obj faceid searchObj =
-	(
-		local epsilon = 0.001
-
-		local face = getFace obj faceid
-		local vert = in coordsys local getVert obj face[1]
-
-		local nVerts = getNumVerts searchObj 
-		for vid in #{1..nVerts} do
-		(
-			local v = in coordsys local getVert searchObj vid
-			if (distance vert v) <= epsilon then 
-			(
-				local facesUsingVert = meshop.getFacesUsingVert searchObj #{vid}
-				for fid in facesUsingVert do
-				(
-					local result = compareFaces obj faceid searchObj fid epsilon
-					if result == true then return fid
-					--format "compare with face:% result:%\n" fid result
-				)
-			)
-			--format "vert:% id:% v:% distance:%\n" vert vid v (distance vert v)
-		)
-
-		-1
-	),
-
 	fn breakAllFaces uvw_Unwrap nfaces =
 	(
 		uvw_Unwrap.setTVSubObjectMode 2
@@ -95,18 +52,6 @@ struct TFBT_BarycentricCoords
         return true
     ),
 
-	/*
-	* Collapses UVW per face in the objects array of editable meshes
-	*
-	* objects: array of editable meshes
-	* uvGeneratorFunction: function used to generate (u, v, w) for each face - function paradigm: uvGeneratorFunction(mesh, faceid) -> [u, v, w]
-	* channel: uvw destination channel
-	* includeLODs: if set to true objects are sorted according to their _LOD* suffix; each face in LOD[i] is searched in LOD[j>i] in order to maintain the same UVW coordinates for matching LOD faces
-	* progressBarInstance: [optional] a progressBar instance to show the operation progress
-	* msgLabelInstance: [optional] a label instance to show information about the operation progress (elapsed time, estimated time, progress percentage)
-	*
-	* return value: empty string if the operation was successful, error string if an error occurred
-	*/
 	fn AddCoords objects channel1 channel2 progressBarInstance:undefined msgLabelInstance:undefined semaphoreBitmapInstance:undefined =
 	(			
 		msgLabelInst = msgLabelInstance
