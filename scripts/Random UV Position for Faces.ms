@@ -11,6 +11,10 @@ Rollout RNDUVW_roll "Parameters"
 	label lbSd "Seed..................." align:#left offset:[-3,3]
 	spinner spSd range:[0,1000000,0] type:#integer fieldwidth:60 align:#left offset:[96,-19]
 
+	-- quantization
+	label lbQuantization "Quantization..................." align:#left offset:[-3,3]
+	spinner spQuantization range:[0,2048,256] type:#integer fieldwidth:60 align:#left offset:[96,-19]
+
 	-- uv mapping channel
 	label lbCh "UV Channel..........." align:#left offset:[-3,5]
 	spinner spCh range:[1, 99, 3] type:#integer fieldwidth:60 align:#left offset:[96,-19]
@@ -26,7 +30,10 @@ Rollout RNDUVW_roll "Parameters"
 
 	fn uvGeneratorFunction mesh faceid =
 	(
-		return [(random 0.0 1.0), (random 0.0 1.0), (random 0.0 1.0)]
+		q = spQuantization.value
+		h = 0.5 / q
+		
+		return [(floor (random 0.0 q)) / q + h, (floor (random 0.0 q)) / q + h, (floor (random 0.0 1.0)) / q + h]
 	)
 
 	on btRandomUVW pressed do
