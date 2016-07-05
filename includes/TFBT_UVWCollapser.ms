@@ -183,7 +183,7 @@ struct TFBT_UVWCollapser
 			for i=1 to lods.count do total = total + lods[i].numfaces
 			progManager.Start total	
 
-			undo on
+			undo "CollapseUVW LODs" on
 			(
 				for i=1 to lods.count do (
 					for face = 1 to lods[i].numFaces do
@@ -241,7 +241,7 @@ struct TFBT_UVWCollapser
 			/*
 			// No LODs Version
 			*/
-			undo on
+			undo "CollapseUVW" on
 			(
 				local total = 0
 				for obj in selection do total = total + obj.numfaces

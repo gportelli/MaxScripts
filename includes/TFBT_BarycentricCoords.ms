@@ -70,7 +70,7 @@ struct TFBT_BarycentricCoords
 			if not utils.IsEditableMesh obj then 
 				return displayMsg (obj.name + "\nis not an editable mesh") error:true
 
-		undo on
+		undo "AddCoords" on
 		(
 			local total = 0
 			for obj in selection do total = total + obj.numfaces
