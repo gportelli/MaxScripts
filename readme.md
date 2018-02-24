@@ -1,4 +1,4 @@
-##A Collection of Scripts for 3D Studio Max
+## A Collection of Scripts for 3D Studio Max
 
 Scripts in the *scripts* folder may include files from the *includes* folder.
 
@@ -18,7 +18,7 @@ Here is a Sublime Text snippet you can use to include a script:
     </snippet>
 
 
-**Instructions:**
+**Instructions**
 
 type in the terminal:
 
